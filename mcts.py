@@ -8,7 +8,10 @@ Created on Wed Nov 22 16:38:07 2017
 import board
 import math
 import random
+# MatPlotlib
 import matplotlib.pyplot as plt
+from matplotlib import pylab
+
 import numpy as np
 
 class Node:
@@ -25,6 +28,7 @@ class Node:
         self.isLeaf = True
         self.hasChildren = False
         self.next_player = -1
+        self.moveTaken = None
 
     def update_score(self, score_param):
         self.score  += score_param
@@ -34,6 +38,9 @@ class Node:
 
     def update_nextPlayer(self, nextPlayer_param):
         self.next_player = nextPlayer_param
+
+    def update_move_taken(self, slot):
+        self.moveTaken = slot
 
     # Print node info is just for checking if UCB1 calculates correctly
     def print_node_info(self):
@@ -68,6 +75,7 @@ class MCTS:
                     #Store all possible moves in actions (pointers to childresn)
                     action = Node(0 ,0.0, cp_board)
                     action.update_nextPlayer(nextPlayer)
+                    action.update_move_taken(i)
                     current.actions.append(action)
             #Current has children
             current.hasChildren = True
@@ -239,7 +247,7 @@ class MCTS:
         # initial state of the game
         current = self.root
         currPlayer = random.randint(0,1)
-
+        noActions = 0
         next = (currPlayer + 1) % 2
         while(not current.board.game_over()):
             #if not game over then we expand
@@ -283,18 +291,18 @@ class MCTS:
             return 0
         elif current.board.get_score(self.player) >=25:
             if self.prnt:
-                print("(Uses simulation) Player {} wins! ".format(self.player +1))
+                print(" Player {} (Monte Carlo) wins! ".format(self.player +1))
             return 1
         else:
             if self.prnt:
-                print ("(Uses random choice) Player {} wins!".format((self.player)))
+                print (" Player {} (Random) wins!".format((self.player)))
             return 0
 
     def analysis(self):
 
         np.set_printoptions(precision =3)
         #How many games per run
-        iterations = 10
+        iterations = 50
         # how many simulation before chosing an action
         nSimulation = 5
 
@@ -303,7 +311,7 @@ class MCTS:
         winRates = []
         simulations = []
 
-        for j in range(0,10):
+        for j in range(0,20):
             for i in range(0,iterations):
                 score += self.mcts_vs_random(nSimulation)
 
@@ -321,17 +329,19 @@ class MCTS:
         print("winrates: {}".format(winRates))
         print("number of simulations {}".format(simulations))
 
+        z = np.polyfit(simulations,winRates, 3)
+        f = np.poly1d(z)
+
+        # calculate new x's and y's
+        x_new = np.linspace(simulations[0], simulations[-1], 50)
+        y_new = f(x_new)
+
+        pylab.title('Polynomial (3rd order) Regression')
         plt.xlabel("Number of Simulations")
         plt.ylabel("Win rate(%)")
-        plt.plot(simulations,winRates)
+        plt.plot(x_new,y_new)
+        plt.scatter(simulations, winRates)
         plt.grid(True)
         plt.show()
 
-tree = MCTS(0,board.Board())
-#set True to print, else false
-tree.prnt = True
 
-# arg 20 is the number of simulation to find each move
-# tree.mcts_vs_random(20)
-
-#tree.analysis()

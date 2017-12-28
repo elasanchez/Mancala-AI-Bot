@@ -9,6 +9,7 @@ Mancala AI Bot
 DEBUG = True
 
 
+
 # Player can either be 0 or 1
 
 class Board:
