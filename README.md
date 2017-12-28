@@ -3,8 +3,8 @@ A Mancala AI Bot implemented in Python using Minimax with Alpha-Beta Pruning for
 Initially created by my colleague Paul Miller.
 
 
-My contribution is to extend the initial Manca Ai program to use Monte Carlo algorithm.
-Monte carlo simulation
+My contribution is to extend the initial Mancala Ai program to use Monte Carlo algorithm,
+Monte carlo simulation.
 
 Files:
     board.py
